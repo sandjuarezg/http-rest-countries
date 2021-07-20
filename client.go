@@ -33,6 +33,7 @@ func main() {
 	var url string
 	var fields string = "name;capital;region;subregion;population;area;languages"
 	var countries []country
+	var ban bool = true
 
 	for {
 		fmt.Println("0. Exit")
@@ -55,57 +56,71 @@ func main() {
 		case "1":
 
 			url = "https://restcountries.eu/rest/v2/region/africa?fields=" + fields
+			ban = true
 
 		case "2":
 
 			url = "https://restcountries.eu/rest/v2/region/americas?fields=" + fields
+			ban = true
 
 		case "3":
 
 			url = "https://restcountries.eu/rest/v2/region/asia?fields=" + fields
+			ban = true
 
 		case "4":
 
 			url = "https://restcountries.eu/rest/v2/region/europe?fields=" + fields
+			ban = true
 
 		case "5":
 
 			url = "https://restcountries.eu/rest/v2/region/oceania?fields=" + fields
+			ban = true
+
+		default:
+
+			ban = false
 
 		}
 
-		request, err := http.NewRequest("GET", url, nil)
-		if err != nil {
-			log.Fatal(err)
-		}
+		if ban {
 
-		request.Header.Set("Accept", "application/json")
-
-		response, err := client.Do(request)
-		if response.StatusCode != 200 {
-			log.Fatal(response.Status)
-		}
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer response.Body.Close()
-
-		err = json.NewDecoder(response.Body).Decode(&countries)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		for i := 0; i < len(countries); i++ {
-			for j := 0; j < len(countries[i].Languages); j++ {
-				fmt.Printf("Name: %s\n", countries[i].Name)
-				fmt.Printf("Capital: %s\n", countries[i].Capital)
-				fmt.Printf("Region: %s\n", countries[i].Region)
-				fmt.Printf("Subregion: %s\n", countries[i].Subregion)
-				fmt.Printf("Population: %d\n", countries[i].Population)
-				fmt.Printf("Area: %02f\n", countries[i].Area)
-				fmt.Printf("Language: %s\n", countries[i].Languages[j].Name)
-				fmt.Println("_________________________________________________")
+			request, err := http.NewRequest("GET", url, nil)
+			if err != nil {
+				log.Fatal(err)
 			}
+
+			request.Header.Set("Accept", "application/json")
+
+			response, err := client.Do(request)
+			if response.StatusCode != 200 {
+				log.Fatal(response.Status)
+			}
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			err = json.NewDecoder(response.Body).Decode(&countries)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			for i := 0; i < len(countries); i++ {
+				for j := 0; j < len(countries[i].Languages); j++ {
+					fmt.Printf("Name: %s\n", countries[i].Name)
+					fmt.Printf("Capital: %s\n", countries[i].Capital)
+					fmt.Printf("Region: %s\n", countries[i].Region)
+					fmt.Printf("Subregion: %s\n", countries[i].Subregion)
+					fmt.Printf("Population: %d\n", countries[i].Population)
+					fmt.Printf("Area: %02f\n", countries[i].Area)
+					fmt.Printf("Language: %s\n", countries[i].Languages[j].Name)
+					fmt.Println("_________________________________________________")
+				}
+			}
+
+			response.Body.Close()
+
 		}
 	}
 }
