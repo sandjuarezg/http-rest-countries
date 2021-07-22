@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -29,63 +28,52 @@ type country struct {
 var client *http.Client = &http.Client{}
 
 func main() {
-	var rStdin *bufio.Reader = bufio.NewReader(os.Stdin)
-	var url string
+	var opc int
 	var fields string = "name;capital;region;subregion;population;area;languages"
 	var countries []country
-	var ban bool = true
 
 	for {
+
+		var url string = "https://restcountries.eu/rest/v2/region/"
+
 		fmt.Println("0. Exit")
 		fmt.Println("1. Africa")
 		fmt.Println("2. Americas")
 		fmt.Println("3. Asia")
 		fmt.Println("4. Europe")
 		fmt.Println("5. Oceania")
-		reply, _, err := rStdin.ReadLine()
-		if err != nil {
-			log.Fatal(err)
-		}
+		fmt.Scan(&opc)
 
-		switch string(reply) {
-		case "0":
+		switch opc {
+		case 0:
 
 			fmt.Println("E X I T I N G . . .")
 			os.Exit(0)
 
-		case "1":
+		case 1:
 
-			url = "https://restcountries.eu/rest/v2/region/africa?fields=" + fields
-			ban = true
+			url = fmt.Sprintf("%safrica?fields=%s", url, fields)
 
-		case "2":
+		case 2:
 
-			url = "https://restcountries.eu/rest/v2/region/americas?fields=" + fields
-			ban = true
+			url = fmt.Sprintf("%samericas?fields=%s", url, fields)
 
-		case "3":
+		case 3:
+			url = fmt.Sprintf("%sasia?fields=%s", url, fields)
 
-			url = "https://restcountries.eu/rest/v2/region/asia?fields=" + fields
-			ban = true
+		case 4:
+			url = fmt.Sprintf("%seurope?fields=%s", url, fields)
 
-		case "4":
-
-			url = "https://restcountries.eu/rest/v2/region/europe?fields=" + fields
-			ban = true
-
-		case "5":
-
-			url = "https://restcountries.eu/rest/v2/region/oceania?fields=" + fields
-			ban = true
+		case 5:
+			url = fmt.Sprintf("%soceania?fields=%s", url, fields)
 
 		default:
 
-			ban = false
+			continue
 
 		}
 
-		if ban {
-
+		func() {
 			request, err := http.NewRequest("GET", url, nil)
 			if err != nil {
 				log.Fatal(err)
@@ -94,12 +82,13 @@ func main() {
 			request.Header.Set("Accept", "application/json")
 
 			response, err := client.Do(request)
-			if response.StatusCode != 200 {
-				log.Fatal(response.Status)
-			}
 			if err != nil {
 				log.Fatal(err)
 			}
+			if response.StatusCode != 200 {
+				log.Fatal(response.Status)
+			}
+			defer response.Body.Close()
 
 			err = json.NewDecoder(response.Body).Decode(&countries)
 			if err != nil {
@@ -118,9 +107,6 @@ func main() {
 					fmt.Println("_________________________________________________")
 				}
 			}
-
-			response.Body.Close()
-
-		}
+		}()
 	}
 }
