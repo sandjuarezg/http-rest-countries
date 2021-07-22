@@ -85,10 +85,11 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
+			defer response.Body.Close()
+
 			if response.StatusCode != 200 {
 				log.Fatal(response.Status)
 			}
-			defer response.Body.Close()
 
 			err = json.NewDecoder(response.Body).Decode(&countries)
 			if err != nil {
